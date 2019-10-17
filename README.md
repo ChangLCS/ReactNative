@@ -5,3 +5,8 @@
 ```
 keytool -genkeypair -v -keystore app-react-native.develop.keystore -alias app-react-native-develop -keyalg RSA -keysize 2048 -validity 50000
 ```
+
+- android 本地启动
+```
+react-native run-android
+```
