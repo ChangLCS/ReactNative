@@ -9,6 +9,4 @@ keytool -genkeypair -v -keystore app-react-native.develop.keystore -alias app-re
 - android 本地启动
 ```
 react-native run-android
-
-
 ```

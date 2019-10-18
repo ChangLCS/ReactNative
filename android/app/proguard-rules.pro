@@ -15,3 +15,7 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-keep class cn.com.cfca.sdk.hke.** { *; }
+-keep class com.cfca.mobile.log.** { *; }
+-keep class com.cfca.mobile.hke.** { *; }
