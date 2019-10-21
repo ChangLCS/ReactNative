@@ -2,7 +2,7 @@
  * Copyright (c) CFCA 2016.
  */
 
-package com.awesomeproject.module.cfca;
+package com.awesomeproject.module.cfca.util;
 
 import android.support.annotation.IntDef;
 

@@ -1,5 +1,6 @@
 package com.awesomeproject;
 
+import com.awesomeproject.module.CfcaModule;
 import com.awesomeproject.module.ToastModule;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;
@@ -24,6 +25,7 @@ public class CustomPackage implements ReactPackage {
         List<NativeModule> modules = new ArrayList<>();
 
         modules.add(new ToastModule(reactContext));
+        modules.add(new CfcaModule(reactContext));
 
         return modules;
     }
