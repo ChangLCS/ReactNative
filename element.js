@@ -10,7 +10,14 @@
 import { NativeModules } from 'react-native';
 // 下一句中的ToastExample即对应上文
 // public String getName()中返回的字符串
-export default {
-  ToastExample: NativeModules.ToastExample,
-  CfcaModule: NativeModules.CfcaModule,
-};
+// export default {
+//   ToastExample: NativeModules.ToastExample,
+//   CfcaModule: NativeModules.CfcaModule,
+// };
+
+export const ToastExample = NativeModules.ToastExample;
+export const CfcaModule = NativeModules.CfcaModule;
+
+// export default {
+//   ToastExample: NativeModules.ToastExample,
+// };

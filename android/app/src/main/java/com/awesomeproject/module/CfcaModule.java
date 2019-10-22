@@ -10,6 +10,8 @@ import com.facebook.react.bridge.Callback;
 
 import cn.com.cfca.sdk.hke.HKEApi;
 import io.reactivex.Flowable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 
 import com.awesomeproject.module.cfca.data.api.HKEApiWrapper;
 
@@ -36,7 +38,12 @@ public class CfcaModule extends ReactContextBaseJavaModule {
                                        Callback successCallback) {
 
         Flowable<String> ret = HKEApiWrapper.getInstance().requestHKEServerRandom(name, identityType, identityCardNumber, phoneNumber, deviceID);
-        successCallback.invoke(ret);
+        Disposable disposable = ret.subscribe(new Consumer<String>() {
+            @Override
+            public void accept(String s) throws Exception {
+                successCallback.invoke(s);
+            }
+        });
 //        Toast.makeText(getReactApplicationContext(), message, duration).show();
     }
 }
