@@ -19,9 +19,9 @@ public final class DemoConstants {
   public static final String SUCCESS = "SUCCESS";
   public static final String MESSAGE = "MESSAGE";
 
-  public static final String ACTION_SIGN = "cn.com.cfca.hke_sdk.ACTION.SIGN";
-  public static final String ACTION_SIGN_HUISHANG = "cn.com.cfca.hke_sdk.ACTION.SIGN.HUISHANG";
-  public static final String ACTION_REVOKE = "cn.com.cfca.hke_sdk.ACTION.REVOKE";
+  public static final String ACTION_SIGN = "com.awesomeproject.module.cfca.ACTION.SIGN";
+  public static final String ACTION_SIGN_HUISHANG = "com.awesomeproject.module.cfca.ACTION.SIGN.HUISHANG";
+  public static final String ACTION_REVOKE = "com.awesomeproject.module.cfca.ACTION.REVOKE";
 
   public static final int SIGN_CODE = 100;
   public static final int RESULT_CODE = 200;

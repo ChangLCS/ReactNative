@@ -9,6 +9,9 @@ buildscript {
         supportLibVersion = "28.0.0"
         rxjava2Version = "2.1.1"
         rxandroid2Version = "2.0.2"
+        okhttp3Version = "3.10.0"
+        reactNativeVersion = "0.59.9"
+        retrofit2Version = '2.3.0'
     }
     repositories {
         google()
