@@ -1,6 +1,7 @@
 package com.awesomeproject.module;
 
 
+import android.app.Application;
 import android.util.Log;
 
 import com.awesomeproject.module.cfca.data.api.TestApi;
@@ -10,6 +11,8 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 
 import cn.com.cfca.sdk.hke.data.AuthenticateInfo;
+import cn.com.cfca.sdk.hke.data.CFCACertificate;
+import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.reactivex.Scheduler;
 import io.reactivex.disposables.CompositeDisposable;
@@ -24,6 +27,9 @@ import okhttp3.Response;
 import okhttp3.Request;
 
 import com.awesomeproject.module.cfca.data.api.DemoApi;
+import com.cfca.mobile.hke.sipedit.SipEditText;
+
+import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -45,17 +51,70 @@ public class CfcaModule extends ReactContextBaseJavaModule {
         return "CfcaModule";
     }
 
-
-    private Call getUserAutherInfoSign(String random, String identityType, String idNo, String phoneNumber) {
-        String url = "/CFCA/getUserAutherInfoSign" + "?random=" + random + "&idType" + identityType + "&idNo" + idNo + "&phoneNo" + phoneNumber;
-        OkHttpClient okHttpClient = new OkHttpClient();
-        final Request request = new Request.Builder()
-                .url(url)
-                .get()//默认就是GET请求，可以不写
-                .build();
-        Call call = okHttpClient.newCall(request);
-        return call;
+    private Flowable<CFCACertificate> downloadCert(String name, String identityType,
+                                                   String identityCardNumber, String phoneNumber, String deviceID) {
+        return Flowable.create(emitter -> {
+            Disposable disposable = HKEApiWrapper.getInstance()
+                    //1
+                    .requestHKEServerRandom(name, identityType, identityCardNumber, phoneNumber, deviceID)
+                    //2
+                    .flatMap(serverRandom -> TestApi.getUserAutherInfoSign(baseUrl + "/CFCA/getUserAutherInfoSign", serverRandom, identityType, identityCardNumber, phoneNumber))
+                    //3
+                    .flatMap(autherInfoSign -> HKEApiWrapper.getInstance().authenticate(autherInfoSign))
+                    //4
+                    .flatMap(info -> {
+                        if (info.getCertificates().size() == 0) {
+                            return HKEApiWrapper.getInstance().downloadCertificate("");
+                        }
+                        return Flowable.create(e -> {
+                            e.onNext(info.getCertificates().get(0));
+                            e.onComplete();
+                        }, BackpressureStrategy.BUFFER);
+                    })
+                    //end
+                    .subscribe(new Consumer<CFCACertificate>() {
+                        @Override
+                        public void accept(CFCACertificate cert) throws Exception {
+                            emitter.onNext(cert);
+                            emitter.onComplete();
+                        }
+                    });
+        }, BackpressureStrategy.BUFFER);
     }
+
+    private Flowable<CFCACertificate> goSign(String name, String identityType,
+                                             String identityCardNumber, String phoneNumber, String deviceID) {
+        return Flowable.create(emitter -> {
+            Disposable disposable = HKEApiWrapper.getInstance()
+                    //1
+                    .requestHKEServerRandom(name, identityType, identityCardNumber, phoneNumber, deviceID)
+                    //2
+                    .flatMap(serverRandom -> TestApi.getUserAutherInfoSign(baseUrl + "/CFCA/getUserAutherInfoSign", serverRandom, identityType, identityCardNumber, phoneNumber))
+                    //3
+                    .flatMap(autherInfoSign -> HKEApiWrapper.getInstance().authenticate(autherInfoSign))
+                    //4
+                    .flatMap(info -> {
+//                        SipEditText sipEditText = new SipEditText(this);
+//                        sipEditText.setServerRandom(info.getPinServerRandom());
+                        if (info.getCertificates().size() == 0) {
+                            return HKEApiWrapper.getInstance().downloadCertificate("");
+                        }
+                        return Flowable.create(e -> {
+                            e.onNext(info.getCertificates().get(0));
+                            e.onComplete();
+                        }, BackpressureStrategy.BUFFER);
+                    })
+                    //end
+                    .subscribe(new Consumer<CFCACertificate>() {
+                        @Override
+                        public void accept(CFCACertificate cert) throws Exception {
+                            emitter.onNext(cert);
+                            emitter.onComplete();
+                        }
+                    });
+        }, BackpressureStrategy.BUFFER);
+    }
+
 
     @ReactMethod
     public void requestHKEServerRandom(String name, String identityType,
@@ -69,10 +128,25 @@ public class CfcaModule extends ReactContextBaseJavaModule {
                 //3
                 .flatMap(autherInfoSign -> HKEApiWrapper.getInstance().authenticate(autherInfoSign))
                 //4
-                .subscribe(new Consumer<AuthenticateInfo>() {
+                .flatMap(info -> {
+                    if (info.getCertificates().size() == 0) {
+                        return HKEApiWrapper.getInstance().downloadCertificate("");
+                    }
+                    return Flowable.create(emitter -> {
+                        emitter.onNext(info.getCertificates().get(0));
+                        emitter.onComplete();
+                    }, BackpressureStrategy.BUFFER);
+                })
+                //end
+                .subscribe(new Consumer<CFCACertificate>() {
                     @Override
-                    public void accept(AuthenticateInfo info) throws Exception {
-                        successCallback.invoke(info);
+                    public void accept(CFCACertificate cert) throws Exception {
+                        JSONObject obj = new JSONObject();
+                        obj.put("Base64", cert.getContentBase64());
+                        obj.put("SubjectCN", cert.getSubjectCN());
+
+                        String ret = obj.toString();
+                        successCallback.invoke(ret);
                     }
                 });
 //

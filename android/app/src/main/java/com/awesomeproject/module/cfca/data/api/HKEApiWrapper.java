@@ -188,8 +188,7 @@ public class HKEApiWrapper {
                     public void onResult(AuthenticateInfo s) {
                         if (s.getCertificates().size() > 0) {
 //              Logger.e("SN", s.getCertificates().get(0).getSerialNumber());
-                        }
-                        if (s.getPinState() == 3) {
+                        }if (s.getPinState() == 3) {
                             emitter.onError(new HKEException(-1, "Pin is locked!"));
                         } else if (s.getPinState() == 4) {
                             emitter.onError(new HKEException(-1, "Pin is locked forever"));
